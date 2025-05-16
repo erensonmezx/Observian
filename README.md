@@ -1,8 +1,8 @@
-# Failsight: Scalable System Monitoring and Metrics Platform
+# Observian: Scalable System Monitoring and Metrics Platform
 
-Failsight is a lightweight, containerized backend platform designed to monitor service performance, system uptime, and error rates in real-time. Built with FastAPI, PostgreSQL, and Prometheus, Failsight simulates the data engineering challenges faced by platform teams: modeling logs, curating high-volume system data, and exposing key metrics for observability.
+Observian is a lightweight, containerized backend platform designed to monitor service performance, system uptime, and error rates in real-time. Built with FastAPI, PostgreSQL, and Prometheus, Observian simulates the data engineering challenges faced by platform teams: modeling logs, curating high-volume system data, and exposing key metrics for observability.
 
-> Inspired by platform architecture patterns and Goldman Sachs’ open-source data platform (Legend), Failsight emphasizes clean data modeling, traceability, access logic, and system reliability.
+> Inspired by platform architecture patterns and Goldman Sachs’ open-source data platform (Legend), Observian emphasizes clean data modeling, traceability, access logic, and system reliability.
 
 ---
 git ps
