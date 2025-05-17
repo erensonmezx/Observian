@@ -1,6 +1,13 @@
 from fastapi import FastAPI
+from app.api import logs, metrics
+from app.api.metrics import metrics_middleware
 
 app = FastAPI()
+
+app.middleware('http')(metrics_middleware)
+
+app.include_router(logs.router)
+app.include_router(metrics.router)
 
 @app.get("/")
 def root():
