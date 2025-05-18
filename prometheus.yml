@@ -1,0 +1,9 @@
+# prometheus.yml
+
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'observian-api'
+    static_configs:
+      - targets: ['observian-api:8000']

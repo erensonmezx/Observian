@@ -7,6 +7,9 @@ from datetime import datetime, timedelta, timezone
 import random
 
 def seed_services(db:Session):
+    if db.query(Service).count() > 0:
+        print("✅ Services already exist. Skipping seeding.")
+        return
     services = [
         Service(name='auth-services', team_owner='Identity Team'),
         Service(name='checkout-service', team_owner='Payments Team'),

@@ -16,9 +16,10 @@ def get_filtered_logs(
     offset: int= 0
 ):
     query = (
-        db.query(LogEvent.id, LogEvent.timestamp, LogEvent.status_code, 
-                 LogEvent.latency_ms, Service.name.label('service_name'))
-    )
+    db.query(LogEvent.id, LogEvent.timestamp, LogEvent.status_code, 
+             LogEvent.latency_ms, Service.name.label('service_name'))
+    .join(Service, LogEvent.service_id == Service.id)
+)
     
     filters = []
     
