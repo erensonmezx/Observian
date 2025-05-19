@@ -48,6 +48,17 @@ services:
     volumes:
       - grafana-storage:/var/lib/grafana
 
+  log-pruner:
+    build: .
+    command: python app/workers/log_pruning_worker.py
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   grafana-storage:

@@ -1,7 +1,9 @@
 import requests
 import time
 import random
-import logging
+import logging 
+import asyncio
+from app.state.control import ingest_control
 
 # config
 BACKEND_URL = 'https://observian.onrender.com/logs'
@@ -59,16 +61,20 @@ def post_to_observian(log_payload):
             logging.warning(f"Failed to send log: {response.status_code} | {response.text}")
     except Exception as e:    
         logging.error(f"Exception while posting log: {e}")
-def poll_github_events():
+
+async def poll_github_events():
     global last_seen_event_id
     logging.info("Starting GitHub event polling loop")
-    
+    poll_count = 0
     while True:
         try:
-            res = requests.get(GITHUB_EVENTS_URL, headers = HEADERS, timeout = 10)
+            res = requests.get(GITHUB_EVENTS_URL, headers=HEADERS, timeout=10)
+            res.raise_for_status()
+            data = res.json()            
+            
             if res.status_code != 200:
                 logging.warning(f"GitHub API error: {res.status_code}")
-                time.sleep(POLL_INTERVAL)
+                await asyncio.sleep(POLL_INTERVAL)
                 continue
             
             events = res.json()
@@ -91,9 +97,13 @@ def poll_github_events():
                 logging.info('No new GitHub Events')
             
         except Exception as e:
-            logging.error(f"Polling error: {e}")
+            logging.exception(f"Unexpected error during GitHub event ingestion: {e}")
+        
+        poll_count += 1
+        if poll_count % 10 == 0:
+            logging.info("GitHub ingestor is still running.")
             
-        time.sleep(POLL_INTERVAL)
+        await asyncio.sleep(POLL_INTERVAL)
 
 if __name__ == "__main__":
-    poll_github_events()
+    asyncio.run(poll_github_events())

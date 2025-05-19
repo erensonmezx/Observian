@@ -1,7 +1,12 @@
 __pycache__/
-.venv/
-.env
 *.pyc
 *.db
+*.log
+.venv/
+env/
+.venv/
+.env
 .notes.txt
 .vscode/
+coverage/
+.pytest_cache/
