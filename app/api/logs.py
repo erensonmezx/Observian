@@ -36,6 +36,7 @@ def get_logs(
     status_code: Optional[int] = Query(None),
     start_time: Optional[datetime] = Query(None),
     end_time: Optional[datetime] = Query(None),
+    event_type: Optional[str] = Query(None),
     limit: int = Query(20, gt=0),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db)
@@ -47,7 +48,8 @@ def get_logs(
         start_time=start_time,
         end_time=end_time,
         limit=limit,
-        offset=offset
+        offset=offset,
+        event_type=event_type
     )
     
 @router.get('/logs/summary')
@@ -59,23 +61,28 @@ class LogEventIn(BaseModel):
     service_name: str
     status_code: int
     latency_ms: float
+    event_type: Optional[str] = None
     
 @router.post('/logs')
 def create_log(log: LogEventIn, db:Session= Depends(get_db)):
     service = db.query(Service).filter(Service.name == log.service_name).first()
     
     if not service:
-        return JSONResponse(status_code= 404, content= {'detail': 'Service not found'})
+        service = Service(name=log.service_name)
+        db.add(service)
+        db.commit()
+        db.refresh(service)
+
+    event_type = log.event_type
 
     new_log = LogEvent(
         service_id = service.id,
         status_code = log.status_code,
-        latency_ms = log.latency_ms
+        latency_ms = log.latency_ms,
+        event_type= event_type
     )    
     db.add(new_log)
     db.commit()
     db.refresh(new_log)
     return {'id': new_log.id, 'status':'created'}
-    
-
     

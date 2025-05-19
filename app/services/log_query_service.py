@@ -12,11 +12,12 @@ def get_filtered_logs(
     status_code: Optional[int]= None,
     start_time: Optional[datetime]= None,
     end_time: Optional[datetime]= None,
+    event_type: Optional[str] = None,
     limit: int= 20,
     offset: int= 0
 ):
     query = (
-    db.query(LogEvent.id, LogEvent.timestamp, LogEvent.status_code, 
+    db.query(LogEvent.id, LogEvent.timestamp, LogEvent.status_code, LogEvent.event_type,
              LogEvent.latency_ms, Service.name.label('service_name'))
     .join(Service, LogEvent.service_id == Service.id)
 )
@@ -31,6 +32,8 @@ def get_filtered_logs(
         filters.append(LogEvent.timestamp >= start_time)
     if end_time:
         filters.append(LogEvent.timestamp <= end_time)
+    if event_type:
+        filters.append(LogEvent.event_type == event_type)
     
     if filters:
         query = query.filter(and_(*filters))
