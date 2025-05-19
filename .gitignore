@@ -1,1 +1,26 @@
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Backend
+__pycache__/
+*.py[cod]
+*.db
+*.log
+.env
+.venv/
+env/
+.vscode/
+.pytest_cache/
+coverage/
+.notes.txt
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env.local
+frontend/.output/
+frontend/.next/
+frontend/.vercel/
