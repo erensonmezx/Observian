@@ -20,9 +20,9 @@ def get_status():
     return {"enabled": ingest_control.is_enabled()}
 
 @router.post("/control/ingestor-toggle")
-def toggle_ingestion(enable: bool, _: str = Depends(verify_api_key)):
+async def toggle_ingestion(enable: bool, _: str = Depends(verify_api_key)):
     ingest_control.toggle(enable)
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     if enable:
         logging.info("Starting GitHub ingestor via API.")
         start_ingestor(loop)
