@@ -1,8 +1,10 @@
+# app/api/control.py
+from fastapi import APIRouter, Header, HTTPException, Depends
 import os
 import logging
-from fastapi import APIRouter, Header, HTTPException, Depends
+import asyncio
 from app.state.control import ingest_control
-from app.state.ingestor_task import start_ingestor, stop_ingestor
+from app.state.ingestor_task import start_ingestor, stop_ingestor, ingestor_task
 from app.services.log_pruner import prune_old_logs
 
 
@@ -20,16 +22,17 @@ def get_status():
 @router.post("/control/ingestor-toggle")
 def toggle_ingestion(enable: bool, _: str = Depends(verify_api_key)):
     ingest_control.toggle(enable)
+    loop = asyncio.get_event_loop()
     if enable:
-        start_ingestor()
+        logging.info("Starting GitHub ingestor via API.")
+        start_ingestor(loop)
     else:
+        logging.info("Stopping GitHub ingestor via API.")
         stop_ingestor()
-        logging.info(f"Ingestor toggled to {'ENABLED' if enable else 'DISABLED'}")
     return {"enabled": ingest_control.is_enabled()}
 
 @router.get("/control/ingestor-health")
 def ingestor_health(_: str = Depends(verify_api_key)):
-    from app.state.ingestor_task import ingestor_task
     if ingestor_task is None:
         return {"running": False, "reason": "Not started"}
     elif ingestor_task.done():
