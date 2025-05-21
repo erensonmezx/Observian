@@ -58,11 +58,17 @@ def get_log_summary(db:Session):
         .group_by(LogEvent.status_code)
         .all()
     )
+    event_type_counts = (
+        db.query(LogEvent.event_type, func.count(LogEvent.id))
+        .group_by(LogEvent.event_type)
+        .all()
+    )
     
     return {
         'total_logs':total_logs,
         'error_rate_percent':round((error_logs/total_logs), 2) if total_logs else 0,
         'status_code_breakdown':{code: count for code, count in status_counts},
+        'event_type_breakdown': {etype or "Unknown": count for etype, count in event_type_counts},
     }
     
 
