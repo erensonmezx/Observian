@@ -1,92 +1,163 @@
-# Observian: Scalable System Monitoring and Metrics Platform
+# Observian
 
-Observian is a lightweight, containerized backend platform designed to monitor service performance, system uptime, and error rates in real-time. Built with FastAPI, PostgreSQL, and Prometheus, Observian simulates the data engineering challenges faced by platform teams: modeling logs, curating high-volume system data, and exposing key metrics for observability.
+**Scalable System Monitoring and Metrics Platform**
 
-> Inspired by platform architecture patterns and Goldman Sachs’ open-source data platform (Legend), Observian emphasizes clean data modeling, traceability, access logic, and system reliability.
+Observian is a containerized, production-grade backend platform designed for real-time monitoring of microservices, system uptime, and error rates. Inspired by enterprise-grade data systems, it emphasizes clean architecture, traceability, and modularity.
 
----
-git ps
-## 📦 Tech Stack
+## 🚀 Project Overview
 
-- **FastAPI** – REST API for serving log and status data
-- **PostgreSQL** – Star schema modeling of logs and system metadata
-- **Prometheus** – Custom metrics collection from services
-- **Grafana** – Dashboard visualization for alerts and performance monitoring
-- **Docker** – Containerization for all services
-- **Kubernetes (Optional)** – Local orchestration and Helm-ready structure
+Observian simulates real-world platform engineering challenges by offering:
 
----
-
-## Key Features
-
-- ✅ **REST API Endpoints** to fetch system logs, status events, and uptime data with filtering and pagination
-- ✅ **Structured Logging** into PostgreSQL using a star schema design with indexing and partitions
-- ✅ **Prometheus Integration** for exposing `/metrics` from the API
-- ✅ **Grafana Dashboards** for real-time monitoring and alert thresholds (e.g., request latency, error rate)
-- ✅ **Planned RBAC Simulation** to mimic role-based access to logs (entitlement modeling)
-- ✅ **Modular Design** to support further event ingestion (Kafka/NATS) or external data sources
+- Centralized log ingestion and querying
+- GitHub event monitoring via background ingestion
+- API-driven control and metrics exposure
+- Prometheus/Grafana integration for observability
+- Scalable, containerized architecture with CI/CD readiness
 
 ---
 
-## Data Model Overview
+## 🛠 Architecture & Tech Stack
 
-**Star Schema Tables**:
-- `log_events` – central fact table storing errors, requests, and response times
-- `services` – dimension table for service names, types, and owners
-- `users` – optional dimension for role-based filters (planned)
-
-Includes:
-- Partitioning on `log_events.timestamp`
-- Indexing on `service_id`, `status`, `error_code`
-
----
-
-## REST API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/logs` | GET | Fetch logs filtered by service, date, severity |
-| `/status` | GET | Aggregated health status by service |
-| `/metrics` | GET | Prometheus-compatible metrics |
-| `/health` | GET | API health check |
-
-Supports query params for filtering, sorting, pagination.
+| Component      | Stack / Tool                              |
+|----------------|-------------------------------------------|
+| Backend        | FastAPI (Python 3.9), SQLAlchemy, Pydantic |
+| Database       | PostgreSQL (Star schema, partitions, indexes) |
+| Metrics        | Prometheus for scraping, Grafana for dashboards |
+| Containerization | Docker & Docker Compose (Kubernetes-ready) |
+| CI/CD Ready    | Render, AWS, or GCP compatible setup       |
+| Config & Tools | Python-dotenv, `requests`, `logging`       |
 
 ---
 
-## Dashboards & Alerts
+## 🔑 Key Features
 
-- **Grafana Panel**: Shows live request latency, error counts, service uptime
-- **Alerts**: Triggered on sustained high error rate, request spike, or API downtime
-
----
-
-## To Get Started
-
-1. Clone this repo
-2. Run `docker-compose up`
-3. Visit `localhost:3000/docs` for API
-4. Visit `localhost:9090` (Prometheus), `localhost:3001` (Grafana)
+- **RESTful APIs** for logs, summaries, live feeds, and system control
+- **GitHub Ingestor**: Async background worker fetches and logs GitHub events
+- **Prometheus Metrics**: Request count, latency, and error rate tracking
+- **Log Pruning**: Automatic and manual pruning support
+- **Health Monitoring**: `/health` and `/control/ingestor-health` endpoints
+- **Secure Control**: API key protected endpoints for sensitive operations
+- **Modular Design**: Clear separation between core logic, services, and workers
 
 ---
 
-## Roadmap
+## 📁 Data Model
 
-- [ ] Add role-based data filtering (RBAC simulation)
-- [ ] Add service-to-service alert mapping
-- [ ] Add support for message queue ingestion (Kafka/NATS)
-- [ ] Convert to Kubernetes-native stack with Helm
+- **Fact Table**: `log_events`  
+  *(id, service_id, timestamp, status_code, event_type, latency_ms)*
+
+- **Dimension Table**: `services`  
+  *(id, name, team_owner)*
+
+> Designed to scale with support for RBAC and additional dimensions.
 
 ---
 
-## 👨‍💻 Author
+## 📡 API Endpoints
 
-**Eren Sonmez**  
-Email: ernsonmez@gmail.com  
-[LinkedIn](https://linkedin.com/in/erensonmez1) | [GitHub](https://github.com/erensonmezx)
+| Endpoint                       | Description                                 |
+|--------------------------------|---------------------------------------------|
+| `GET /logs`                   | Filter logs by service, status, event type, time |
+| `GET /logs/summary`          | Aggregated log stats                        |
+| `GET /logs/live-feed`        | Latest N logs for live dashboards           |
+| `POST /logs`                 | Create a new log entry                      |
+| `GET /control/ingestor-status` | Check GitHub ingestor state                |
+| `POST /control/ingestor-toggle` | Toggle ingestor on/off (API key required) |
+| `GET /control/ingestor-health` | Validate background task is running        |
+| `POST /control/prune`        | Manually prune old logs (API key required)  |
+| `GET /metrics`               | Prometheus-compatible metrics               |
+| `GET /health`                | API liveness check                          |
+
+---
+
+## ⚙️ Background Workers
+
+- **GitHub Ingestor**: Async worker fetches public GitHub events and posts to `/logs`.
+- **Log Pruner**: Periodically removes logs older than N days.
+
+---
+
+## 🔐 Security & Reliability
+
+- **API Key Auth** for control endpoints
+- **Thread-safe** state for background worker toggling
+- **Error-handling** with consistent logging and responses
+
+---
+
+## 🚀 Deployment
+
+### Using Docker Compose
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/observian.git
+cd observian
+
+# Set up environment
+cp .env.example .env
+
+# Start the system
+docker-compose up --build
+
+> Includes API, PostgreSQL, Prometheus, Grafana, and background workers.
+```
+
+### System Boots With:
+
+* DB wait + migrations
+* Service table seeding
+* FastAPI startup
+* Prometheus & Grafana preconfigured
+
+---
+
+## 🧪 Development & Testing
+
+* Modular structure: `api/`, `models/`, `services/`, `workers/`
+* Logging: Uniform across background and API processes
+* Test Scripts: For log pruning, DB connectivity
+
+---
+
+## 📊 Sample Use Cases
+
+* Real-time service dashboard with Prometheus and Grafana
+* GitHub activity pipeline for monitoring dev team behavior
+* Auto-pruned, scalable log storage for infrastructure teams
+* System control via secure endpoints (toggle/prune workers)
+
+---
+
+## 🧠 Notable Challenges Solved
+
+* **Async Task Control via API**: Start/stop background tasks securely
+* **Structured, Fast Log Ingestion**: Indexed PostgreSQL with partitioning
+* **Integrated Observability**: `/metrics`, health checks, Grafana-ready
+
+---
+
+## 👀 Future Enhancements
+
+* Frontend dashboard (in progress)
+* RBAC system for user-level filtering
+* Webhook/event-stream ingestion
+* OAuth for admin dashboard
+
+---
+
+## 📌 Frontend Note
+
+The frontend for Observian is built using **React & Next.js**, currently deployed in Firebase AI tools. It connects to the above API endpoints for log visualization and control. Deployment is optional and can be customized.
+
+---
+
+## 🧑‍💻 Contributing
+
+Pull requests are welcome! For major changes, please open an issue first to discuss what you’d like to change.
 
 ---
 
 ## 📄 License
 
-MIT – Free for educational and professional portfolio use.
+MIT License. See `LICENSE.md` for more information.
