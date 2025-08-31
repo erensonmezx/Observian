@@ -1,9 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 
-Base = declarative_base()
+from app.db.database import Base
 
 class Service(Base):
     __tablename__ = 'services'
