@@ -1,8 +1,21 @@
 #!/bin/bash
 set -e
 
+# Ensure the database host resolves before attempting connection checks
+if ! getent hosts "$DB_HOST" >/dev/null; then
+  echo "❌ Unable to resolve host: $DB_HOST"
+  exit 1
+fi
+
 echo "🔄 Waiting for PostgreSQL to be ready..."
-while ! nc -z $DB_HOST $DB_PORT; do
+START_TIME=$(date +%s)
+TIMEOUT=${DB_TIMEOUT:-60}
+while ! nc -z "$DB_HOST" "$DB_PORT"; do
+  elapsed=$(( $(date +%s) - START_TIME ))
+  if [ "$elapsed" -ge "$TIMEOUT" ]; then
+    echo "⏰ Timeout: unable to connect to $DB_HOST:$DB_PORT after ${TIMEOUT}s"
+    exit 1
+  fi
   sleep 1
 done
 
